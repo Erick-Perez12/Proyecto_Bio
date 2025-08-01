@@ -80,10 +80,8 @@ def align_to_center(sequences, center_index, match, mismatch, gap):
                 center_sequence, seq, match, mismatch, gap)
             align = globalTraceback(
                 dp, center_sequence, seq, match, mismatch, gap)
-            # align1, align2, _ = needleman_wunsch(center_sequence, seq)
             aligned_sequences.append(align[-1])
     return aligned_sequences
-
 
 def merge_alignments(center_seq, aligned_sequences):
     msa = [center_seq]

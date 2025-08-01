@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bioinformática</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script>
+        function crearInputConArchivo(id, labelText, name = id) {
+            return `
+                <label for="${id}">${labelText}</label>
+                <input type="text" id="${id}" name="${name}" placeholder="Ingrese su secuencia" maxlength="30"><br><br>
+                <label for="${id}_file">O suba un archivo .txt:</label>
+                <input type="file" id="${id}_file" accept=".txt"><br><br>
+            `;
+        }
+
+        function enlazarArchivoATexto(id) {
+            const fileInput = document.getElementById(id + '_file');
+            const textInput = document.getElementById(id);
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    const file = fileInput.files[0];
+                    if (file && file.type === "text/plain") {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const content = e.target.result.replace(/\s+/g, '');
+                            textInput.value = content.slice(0, 30);
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        alert("Por favor, seleccione un archivo .txt válido.");
+                    }
+                });
+            }
+        }
+        function crearMatrizDistanciaConArchivo(idTextArea = 'distanceMatrix', name = 'distanceMatrix') {
+            return `
+                <label for="${idTextArea}">Matriz de distancia:</label>
+                <textarea id="${idTextArea}" name="${name}" rows="4" placeholder="Ingrese la matriz de distancia" ></textarea><br><br>
+                <label for="${idTextArea}_file">O suba un archivo .txt:</label>
+                <input type="file" id="${idTextArea}_file" accept=".txt"><br><br>
+            `;
+        }
+        function enlazarArchivoATextarea(id) {
+            const fileInput = document.getElementById(id + '_file');
+            const textarea = document.getElementById(id);
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    const file = fileInput.files[0];
+                    if (file && file.type === "text/plain") {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            textarea.value = e.target.result.trim();
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        alert("Por favor, seleccione un archivo .txt válido.");
+                    }
+                });
+            }
+        }
+
+
+        function showInputs() {
+            const operation = document.getElementById("operation").value;
+            const inputContainer = document.getElementById("input-container");
+            const extraInputs = document.getElementById("extra-inputs");
+
+            if (operation !== "") {
+                inputContainer.style.display = "block";
+                extraInputs.innerHTML = "";
+
+                if (operation === "sub_cadena") {
+                    extraInputs.innerHTML = 
+                        crearInputConArchivo('sequence1', 'Secuencia 1:') +
+                        crearInputConArchivo('sequence2', 'Secuencia 2:');
+
+                    enlazarArchivoATexto('sequence1');
+                    enlazarArchivoATexto('sequence2');
+                }
+                else if (operation === "transcripcion_adn_arn") {
+                    extraInputs.innerHTML = crearInputConArchivo('sequence', 'Secuencia:');
+                    enlazarArchivoATexto('sequence');
+                }
+
+                else if (operation === "matriz_punto") {
+                    extraInputs.innerHTML = 
+                        crearInputConArchivo('sequence1', 'Secuencia 1:') +
+                        crearInputConArchivo('sequence2', 'Secuencia 2:');
+
+                    enlazarArchivoATexto('sequence1');
+                    enlazarArchivoATexto('sequence2');
+                }
+                else if (operation === "identificar_secuencia") {
+                    extraInputs.innerHTML = crearInputConArchivo('sequence', 'Secuencia:');
+                    enlazarArchivoATexto('sequence');
+                }
+                else if (operation === "mayusculas") {
+                    extraInputs.innerHTML = 
+                        crearInputConArchivo('sequence1', 'Secuencia 1:') +
+                        crearInputConArchivo('sequence2', 'Secuencia 2:');
+
+                    enlazarArchivoATexto('sequence1');
+                    enlazarArchivoATexto('sequence2');
+                }
+                else if (operation === "coincidencias") {
+                     extraInputs.innerHTML = 
+                        crearInputConArchivo('sequence1', 'Secuencia 1:') +
+                        crearInputConArchivo('sequence2', 'Secuencia 2:');
+
+                    enlazarArchivoATexto('sequence1');
+                    enlazarArchivoATexto('sequence2');
+                }
+                else if (operation === "needleman_wunsch" || operation === "smith_waterman") {
+                    extraInputs.innerHTML = 
+                        crearInputConArchivo('sequence1', 'Secuencia 1:') +
+                        crearInputConArchivo('sequence2', 'Secuencia 2:') +
+                        `
+                        <label for="match">Match:</label>
+                        <input type="number" id="match" name="match" placeholder="#" value="{{ match }}" required><br><br>
+                        <label for="mismatch">Mismatch:</label>
+                        <input type="number" id="mismatch" name="mismatch" placeholder="#" value="{{ mismatch }}" required><br><br>
+                        <label for="gap">Gap:</label>
+                        <input type="number" id="gap" name="gap" placeholder="#" value="{{ gap }}" required><br><br>
+                        `;
+                    enlazarArchivoATexto('sequence1');
+                    enlazarArchivoATexto('sequence2');
+                }
+                else if (operation === "blosum_proteinas") {
+                    extraInputs.innerHTML = 
+                        crearInputConArchivo('sequence1', 'Secuencia 1:') +
+                        crearInputConArchivo('sequence2', 'Secuencia 2:') +
+                        `
+                        <label for="blosumSize">Tamaño de Cadenas para visualizar:</label>
+                        <input type="number" id="blosumSize" name="blosumSize" placeholder="10" value="{{ blosumSize }}" min="1" step="1" required><br><br>
+                        <label for="blosumMatrix">Matriz BLOSUM:</label>
+                        <select id="blosumMatrix" name="blosumMatrix">
+                            <option value="1">BLOSUM62</option>
+                            <option value="2">BLOSUM90</option>
+                            <option value="3">BLOSUM80</option>
+                            <option value="4">BLOSUM50</option>
+                            <option value="5">BLOSUM45</option>
+                        </select><br><br>
+                        `;
+                    enlazarArchivoATexto('sequence1');
+                    enlazarArchivoATexto('sequence2');
+                }
+
+                else if (operation === "Clustering Distancia Mínima" || operation === "Clustering Distancia Máxima" || operation === "Clustering Distancia Promedio") {
+                    extraInputs.innerHTML = crearMatrizDistanciaConArchivo();
+                    enlazarArchivoATextarea('distanceMatrix');
+                }
+                else if (operation === "structure_secondary") {
+                    extraInputs.innerHTML = crearInputConArchivo('sequence', 'Secuencia (ARN):');
+                    enlazarArchivoATexto('sequence');
+                }
+                else if (operation === "star_alignment") {
+                    extraInputs.innerHTML = `
+                        <label for="match">Match:</label>
+                        <input type="number" id="match" name="match" placeholder="#" value="{{ match }}" required><br><br>
+                        <label for="mismatch">Mismatch:</label>
+                        <input type="number" id="mismatch" name="mismatch" placeholder="#" value="{{ mismatch }}" required><br><br>
+                        <label for="gap">Gap:</label>
+                        <input type="number" id="gap" name="gap" placeholder="#" value="{{ gap }}" required><br><br>
+
+                        <div id="additionalInputsContainer" style="max-height: 200px; overflow-y: auto;">
+                            ${crearInputConArchivo('sequence1', 'Secuencia 1:', 'sequence')}
+                            ${crearInputConArchivo('sequence2', 'Secuencia 2:', 'sequence')}
+                            <div id="additionalInputs"></div>
+                        </div>    
+                        <button id="additionalInputStart" type="button" onclick="addMoreInputs()">Agregar más inputs</button>
+                    `;
+                    enlazarArchivoATexto('sequence1');
+                    enlazarArchivoATexto('sequence2');
+                }
+                else if (operation == "nj") {
+                    extraInputs.innerHTML = crearMatrizDistanciaConArchivo();
+                    enlazarArchivoATextarea('distanceMatrix');
+                }
+                else if (operation === "upgma") {
+                    extraInputs.innerHTML = crearMatrizDistanciaConArchivo();
+                    enlazarArchivoATextarea('distanceMatrix');
+                }
+
+            } else {
+                inputContainer.style.display = "none";
+            }
+        }
+        function addMoreInputs() {
+            const additionalInputs = document.getElementById("additionalInputs");
+            const newInputIndex = additionalInputs.childElementCount + 3;
+            const newId = `sequence${newInputIndex}`;
+            const newInput = document.createElement('div');
+
+            newInput.innerHTML = crearInputConArchivo(newId, `Secuencia ${newInputIndex}:`, "sequence");
+            additionalInputs.appendChild(newInput);
+            enlazarArchivoATexto(newId);
+        }
+
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const operation = document.getElementById("operation").value;
+            if (operation === "") {
+                document.getElementById("input-container").style.display = "none";
+            } else {
+                document.getElementById("input-container").style.display = "block";
+                showInputs();  
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="header">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 15c6.667-6 13.333 0 20-6" />
+                    <path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993" />
+                    <path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993" />
+                    <path d="m17 6-2.5-2.5" />
+                    <path d="m14 8-1-1" />
+                    <path d="m7 18 2.5 2.5" />
+                    <path d="m3.5 14.5.5.5" />
+                    <path d="m20 9 .5.5" />
+                    <path d="m6.5 12.5 1 1" />
+                    <path d="m16.5 10.5 1 1" />
+                    <path d="m10 16 1.5 1.5" />
+                </svg>
+                <h2>Bioinformatics</h2>
+            </div>
+            <form action="/analizar" method="post">
+                <label for="operation">Operación:</label>
+                <select id="operation" name="operation" onchange="showInputs()">
+                    <option value="" {% if operation=='' %} selected {% endif %}>Seleccione una operación</option>
+
+                    <option value="identificar_secuencia" {% if operation=='identificar_secuencia' %} selected {% endif
+                        %}>Identificador de Secuencia</option>
+                    <option value="transcripcion_adn_arn" {% if operation=='transcripcion_adn_arn' %} selected {% endif
+                        %}>Transcripción de ADN</option>
+                    <option value="sub_cadena" {% if operation=='sub_cadena' %} selected {% endif %}>
+                        Identificador de Substrings en Secuencias</option>
+                    <option value="matriz_punto" {% if operation=='matriz_punto' %} selected {% endif %}>
+                        Matriz de Punto</option>
+                    <option value="needleman_wunsch" {% if operation=='needleman_wunsch' %} selected {% endif %}">
+                        Alineamiento Global</option>
+                    <option value="smith_waterman" {% if operation=='smith_waterman' %} selected {% endif %}>
+                        Alineamiento Local</option>
+                    <option value="blosum_proteinas" {% if operation=='blosum_proteinas' %} selected {% endif %}>
+                        Alineamiento de Proteínas</option>
+                    <option value="star_alignment" {% if operation=='star_alignment' %} selected {% endif %}>
+                        Alineamiento Estrella</option>
+                    <option value="nj" {% if operation=='nj' %} selected {% endif %}>
+                        Neighbor Joining</option>
+                    <option value="Clustering Distancia Mínima" {% if operation=='Clustering Distancia Mínima' %}
+                        selected {% endif %} required>Clustering Distancia Mínima</option>
+                    <option value="Clustering Distancia Máxima" {% if operation=='Clustering Distancia Máxima' %}
+                        selected {% endif %} required>Clustering Distancia Máxima</option>
+                    <option value="Clustering Distancia Promedio" {% if operation=='Clustering Distancia Promedio' %}
+                        selected {% endif %}required>Clustering Distancia Promedio</option>
+                    <option value="upgma" {% if operation=='upgma' %}selected {% endif %}>
+                        UPGMA</option>
+                    <option value="structure_secondary" {% if operation=='structure_secondary' %}selected {% endif %}>
+                        Estructura Secundaria</option>
+                </select><br><br>
+
+                <div id="input-container" {% if operation=='' %}style="display:none;" {% endif %}>
+
+                    <div id="extra-inputs">
+                    </div>
+                </div>
+
+                <input id="analyzeButton" type="submit" value="Analizar">
+            </form>
+        </div>
+        <button id="resetButton" onclick="window.location.href='/'">
+            <img src="static/images/cerrar-sesion.png" alt="Reiniciar" class="button-icon"> Salir
+        </button>
+        <div class="result-container">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+
+</html>

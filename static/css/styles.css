@@ -1,4 +1,4 @@
-/* styles.css */
+
 /* Estilos para el botón "Agregar más inputs" */
 .additionalInputs {
     display: flex;
@@ -25,23 +25,26 @@ body {
 
 .form-container {
     width: 20%;
-    height: 90vh;
+    min-height: 90vh;
     background-color: #fff;
     color: #f0f0f0;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: #2c3e50;
+    overflow: auto;
 }
 
 .result-container {
+    min-height: 90vh; /* Altura mínima de 90vh */
     width: 80%;
-    height: 90vh;
     background-color: #e6f2ef;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: auto; /* Permite scroll si es necesario */
 }
+
 
 form {
     margin-bottom: 20px;

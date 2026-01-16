@@ -1,0 +1,28 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<style>
+
+.content-box {
+    text-align: center;
+    margin-top: 10%;
+}
+
+/* Título */
+.content-box h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Párrafos */
+.content-box p {
+    font-size: 1.3rem;
+    margin: 0.5rem 0;
+}
+</style>
+<div class="content-box">
+    <h2>Score Total</h2>
+    <p>El score total es: {{ score }}</p>
+    <p>Subcadenas: {{ sub_cadena }}</p>
+</div>
+{% endblock %}
